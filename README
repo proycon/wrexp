@@ -1,0 +1,62 @@
+# WREXP - Experiment Wrapper
+#   by Maarten van Gompel (proycon)
+#   http://proycon.anaproy.nl
+#   http://github.com/wrexp
+#
+#   Licensed under the GNU Public License v3
+#-----------------------------------------------------------
+
+Wrexp is an experiment wrapper suitable for launching whatever command-line tool you want. It takes care of saving standard output and standard error output to permanently available logs, and provides a full and colourful history of all run experiments. When the program/experiment you launched is done, an e-mail will be send reporting its success or failure (based on return code), along with fragments of the log. 
+
+It is ideally suitable for running scientific experiments which may possibly take a long time to complete, and for which is important you have a back-log on how exactly they were invoked.
+
+Each experiment is assigned a unique ID/name, which you always can use to view its logs.
+
+FEATURES
+----------------------
+
+- Permanent logs of standard output, standard error output  (wrexp log , wrexp errlog)
+- Colourful history of all run experiments (wrexp history)
+- Process list of currently running experiments (wrexp ps)
+- Log of resource consumption (periodic ps output)  (wrexp reslog)
+- Log of system version state, customisable (wrexp versionlog)
+- Periodic reports by mail on the status of running experiments
+
+
+INSTALLATION
+---------------
+
+1) Put wrexp somewhere (preferably in your $PATH)
+2) Put wrexpconf.py in the same directory and change the configuration to your liking.
+
+USAGE
+-----------------
+
+Syntax: wrexp start    EXPERIMENT-ID [CWD] COMMAND
+          - Start an experiment (optionally within a specific working directory)
+        wrexp stop     EXPERIMENT-ID
+          - Stop an experiment (gently)
+        wrexp kill     EXPERIMENT-ID
+          - Stop an experiment (forcibly)
+        wrexp ps       [HOST]
+          - View process list (optionally for only the given host)
+        wrexp history  [YEARMONTH/FILTERKEYWORD]
+          - View experiment history (optionally with filter keyword of time filter (YYYYMM))
+        wrexp log      EXPERIMENT-ID
+          - View standard output of experiment
+        wrexp errlog   EXPERIMENT-ID
+          - View error output of experiment
+        wrexp reslog   EXPERIMENT-ID
+          - View resource usage log of experiment (periodic ps output)
+        wrexp versionlog   EXPERIMENT-ID
+          - View version log of experiment
+        wrexp audit    EXPERIMENT-ID
+          - Follow all output of a running experiment live
+        wrexp auditlog EXPERIMENT-ID
+        wrexp auditerr EXPERIMENT-ID
+        wrexp auditres EXPERIMENT-ID
+        wrexp mailstat EXPERIMENT-ID
+          - Force a report to be mailed about this experiment
+
+
+
