@@ -517,7 +517,21 @@ else:
         else:
             print >>sys.stderr, "No such experiment on the current host"
     elif command in ['repeat','restart']:
-        pass #TODO        
+        id = sys.argv[2] if len(sys.argv) >= 3 else usage()
+        headfile =  expconf.EXPLOGDIR + id + '.head'        
+        f = open(headfile,'r')            
+        for line in f:
+            if line[0:4] == '*ID*':
+                id = line[4:].strip()
+            elif line[0:9] == '*COMMAND*':
+                cmd = line[9:].strip()                        
+            elif line[0:5] == '*CWD*':
+                os.chdir(line[5:].strip())
+        f.close()
+        args = cmd.split(' ')
+        pid = start(id, args)
+        if pid:
+           wait(id, pid)
     elif command in ['stdout','log','out']:
         id = sys.argv[2] if len(sys.argv) >= 3 else usage()
         logfile =  expconf.EXPLOGDIR + id + '.log'
