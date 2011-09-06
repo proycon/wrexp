@@ -31,6 +31,7 @@ import sys
 import os
 import glob
 import time
+import re
 
 import wrexpconf as expconf
 
@@ -136,6 +137,22 @@ def magenta(s):
    CSI="\x1B["
    reset=CSI+"m"
    return CSI+"35m" + s + CSI + "0m"   
+
+
+def boldoptions(s):
+    r = re.compile(r'\s--?[A-Za-z0-9]+[\s=]')
+    out = ""
+    begin = 0
+    for match in r.finditer(s):                
+        start = match.start()
+        end = match.end()
+        out += s[begin:start] + bold(s[start:end])
+        print s[start:end]
+        begin = end    
+    out += s[begin:]
+    return out
+        
+
    
    
 def tail(filepath, f, read_size=1024): #source: Manu Garg, http://www.manugarg.com/2007/04/tailing-in-python.html
@@ -204,7 +221,7 @@ def ps(host, dir = ""):
                    continue
             else:
                 pidstring = magenta(str(pid))
-            out +=  "%-33s %-22s %-6s\n  --> %s\n" % (bold(white(expid)), host,pidstring, blue(cmdline.strip()))
+            out +=  "%-33s %-22s %-6s\n  --> %s\n" % (bold(white(expid)), host,pidstring, blue(boldoptions(cmdline.strip())))
     
     if HOST == host and found and pids:
         print "---"
@@ -479,7 +496,7 @@ else:
                     prompt = bold(green('SUCCESS')) + ' ' + cwd + bold(green('$'))
                 else:
                     prompt =  bold(red('MISSING')) + ' ' + cwd + bold(red('$'))                       
-            out = yellow(start) + ' ' + green(user+'@'+host) +' ' +bold(white(id)) + ' ' + prompt +' ' +blue(cmd)
+            out = yellow(start) + ' ' + green(user+'@'+host) +' ' +bold(white(id)) + ' ' + prompt +' ' +blue(boldoptions(cmd))
             print out
             print bold(white("====================="))
             os.system("wc -l " + expconf.EXPLOGDIR + id + '.log')            
@@ -646,7 +663,7 @@ else:
                         userhost = magenta(userhost)
                         prompt = workdir + bold(magenta(prompt))    
                     
-                    out = yellow(date[0:4] + '-' + date[4:6] + '-' + date[6:8] + ' ' + weekday + ' ' + time) + ' ' + userhost +' ' +bold(white(id)) + ' ' + prompt +' ' +blue(cmdline)
+                    out = yellow(date[0:4] + '-' + date[4:6] + '-' + date[6:8] + ' ' + weekday + ' ' + time) + ' ' + userhost +' ' +bold(white(id)) + ' ' + prompt +' ' +blue(boldoptions(cmdline))
                     if cmdline == prevcmdline:
                         #duplicate, replace:
                         output[-1] = out
