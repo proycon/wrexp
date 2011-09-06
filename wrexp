@@ -45,8 +45,12 @@ if not os.path.isdir(expconf.EXPLOGDIR):
 def usage():
     print "Syntax: wrexp start    EXPERIMENT-ID [CWD] COMMAND"
     print "          - Start an experiment (optionally within a specific working directory)"
+    print "        wrexp info     EXPERIMENT-ID"
+    print "          - Show information on an experiment"
+    print "        wrexp repeat   EXPERIMENT-ID"    
+    print "          - Repeat an experiment"
     print "        wrexp stop     EXPERIMENT-ID"
-    print "          - Stop an experiment (gently)"
+    print "          - Stop an experiment (gently)"    
     print "        wrexp kill     EXPERIMENT-ID"
     print "          - Stop an experiment (forcibly)"
     print "        wrexp ps       [HOST]"
@@ -68,6 +72,14 @@ def usage():
     print "        wrexp auditres EXPERIMENT-ID"
     print "        wrexp mailstat EXPERIMENT-ID"
     print "          - Force a report to be mailed about this experiment"
+    #print "        wrexp tag     EXPERIMENT-ID TAG"
+    #print "          - Associate a tag with an experiment (multiple tags allowed)"
+    #print "        wrexp untag   EXPERIMENT-ID TAG"
+    #print "          - Remove an associate tag from an experiment (multiple tags allowed)"
+    #print "        wrexp list    TAG"
+    #print "          - Find experiments by tag"
+    #print "        wrexp note     EXPERIMENT-ID TEXT"
+    #print "          - Add a note to an experiment"
     #print "        exp initbatch BATCH-ID [MODE]"
     #print "          - initialise a (manual) batch experiment"
     #print "        exp add BATCH-ID EXPERIMENT-ID COMMAND"
@@ -289,6 +301,10 @@ def start(id, cmdline):
 
     return process
 
+def loadtags():
+    for f in glob.glob(expconf.PROCDIR + '/*.tag'):
+        pass #TODO
+
 
 def wait(id, process):
     global HOST, USER
@@ -419,11 +435,40 @@ else:
             if ret == 0:
                 try:
                     os.unlink(procfilename)
+                    print >>sys.stderr, "Process terminated"  
                 except:
                     print >> sys.stderr,"ERROR REMOVING PROCESS FILE!"
-                    pass
+                    pass                  
+            else:
+                print >>sys.stderr, "Process not terminated yet"    
         else:
             print >>sys.stderr, "No such experiment on the current host"
+    elif command in ['info','i']:
+        id = sys.argv[2] if len(sys.argv) >= 3 else usage()
+        headfile =  expconf.EXPLOGDIR + id + '.head'        
+        if os.path.exists(headfile):
+            print bold(white("INFO for " + id))
+            print bold(white('==========================='))
+            print 'State:', 
+            if os.path.exists(expconf.PROCDIR + '/' + userhost.split('@')[1] + '/' + id):
+                print bold(yellow('RUNNING'))
+            else:                
+                if os.path.exists(expconf.EXPLOGDIR + id + '.failed'):
+                    print  bold(red('FAILED'))
+                elif os.path.exists(expconf.EXPLOGDIR + id + '.log') and os.path.exists(expconf.EXPLOGDIR + id + '.err'):
+                    print bold(green('SUCCESS'))
+                else:
+                    print bold(red('MISSING'))                    
+            os.system("cat " + headfile)
+            print "====================="
+            print "Output line count: ",
+            os.system("wc -l " + expconf.EXPLOGDIR + id + '.log')            
+            print "Error output line count: ",
+            os.system("wc -l " + expconf.EXPLOGDIR + id + '.err')                        
+        else:
+            print >>sys.stderr, "No such experiment on the current host"
+    elif command in ['repeat','restart']:
+        pass #TODO        
     elif command in ['stdout','log','out']:
         id = sys.argv[2] if len(sys.argv) >= 3 else usage()
         logfile =  expconf.EXPLOGDIR + id + '.log'
@@ -492,7 +537,7 @@ else:
             os.system('tail -n 100 ' + errlogfile + " " + logfile + " " + reslogfile + " | mail -s \"Requested process report for " + id + " on " + HOST + "\" " + expconf.MAILTO)        
         else:
             print "No such experiment running on " + host
-    elif command == 'ps' or command == 'ls':
+    elif command == 'ps':
         if len(sys.argv) >= 3:
             host = sys.argv[2]
             if os.path.isdir(expconf.PROCDIR+'/'+host):
