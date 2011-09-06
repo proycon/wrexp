@@ -147,7 +147,6 @@ def boldoptions(s):
         start = match.start()
         end = match.end()
         out += s[begin:start] + bold(s[start:end])
-        print s[start:end]
         begin = end    
     out += s[begin:]
     return out
