@@ -147,7 +147,7 @@ def boldoptions(s):
         reset=CSI+"m"
         return CSI+"1m" + s + CSI + "0m" + CSI + "34m"
     
-    r = re.compile(r'\s--?[A-Za-z0-9]+[\s=]')
+    r = re.compile(r'\s--?[A-Za-z0-9]+=?')
     out = ""
     begin = 0
     for match in r.finditer(s):                
