@@ -102,6 +102,11 @@ def bold(s):
    CSI="\x1B["
    reset=CSI+"m"
    return CSI+"1m" + s + CSI + "0m"
+   
+def white(s):
+   CSI="\x1B["
+   reset=CSI+"m"
+   return CSI+"37m" + s + CSI + "0m"   
 
 
 def red(s):
@@ -199,7 +204,7 @@ def ps(host, dir = ""):
                    continue
             else:
                 pidstring = magenta(str(pid))
-            out +=  "%-33s %-22s %-6s\n  --> %s\n" % (bold(expid), host,pidstring, blue(cmdline.strip()))
+            out +=  "%-33s %-22s %-6s\n  --> %s\n" % (bold(white(expid)), host,pidstring, blue(cmdline.strip()))
     
     if HOST == host and found and pids:
         print "---"
@@ -620,7 +625,7 @@ else:
                         userhost = magenta(userhost)
                         prompt = workdir + bold(magenta(prompt))    
                     
-                    out = yellow(date[0:4] + '-' + date[4:6] + '-' + date[6:8] + ' ' + weekday + ' ' + time) + ' ' + userhost +' ' +bold(id) + ' ' + prompt +' ' +cmdline
+                    out = yellow(date[0:4] + '-' + date[4:6] + '-' + date[6:8] + ' ' + weekday + ' ' + time) + ' ' + userhost +' ' +bold(white(id)) + ' ' + prompt +' ' +cmdline
                     if cmdline == prevcmdline:
                         #duplicate, replace:
                         output[-1] = out
