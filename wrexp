@@ -306,7 +306,8 @@ def start(id, cmdline):
     reslog.write("#START:    " + starttime + '\n')
     reslog.close()
 
-
+    log.flush()
+    errlog.flush()
 
     process = subprocess.Popen(cmdline, shell=False,stdout=log,stderr=errlog)
 
@@ -378,8 +379,7 @@ def wait(id, process):
     try:
         os.unlink(expconf.PROCDIR + '/' + HOST + '/' + id )
     except:
-        print >> sys.stderr,"ERROR REMOVING PROCESS FILE!"
-        pass
+        print >>sys.stderr,"ERROR REMOVING PROCESS FILE: " + expconf.PROCDIR + '/' + HOST + '/' + id
 
     #mail = (duration > 60) #we won't mail if we finish in less than a minute
     headfile = expconf.EXPLOGDIR + '/' + id + '.head'
