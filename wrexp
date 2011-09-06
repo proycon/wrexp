@@ -139,14 +139,21 @@ def magenta(s):
    return CSI+"35m" + s + CSI + "0m"   
 
 
+
+
 def boldoptions(s):
+    def bleubold(s):
+        CSI="\x1B["
+        reset=CSI+"m"
+        return CSI+"1m" + s + CSI + "34m"
+    
     r = re.compile(r'\s--?[A-Za-z0-9]+[\s=]')
     out = ""
     begin = 0
     for match in r.finditer(s):                
         start = match.start()
         end = match.end()
-        out += s[begin:start] + bold(s[start:end])
+        out += s[begin:start] + bleubold(s[start:end])
         begin = end    
     out += s[begin:]
     return out
