@@ -392,7 +392,7 @@ else:
         else:
             cwd = None
             cmd = sys.argv[3]
-            args = sys.argv[5:]
+            args = sys.argv[4:]
     
         ret = os.system('which ' + cmd + ' >/dev/null 2> /dev/null')
         if ret != 0:
