@@ -454,22 +454,43 @@ else:
         if os.path.exists(headfile):
             print bold(white("INFO for " + id))
             print bold(white('==========================='))
-            print 'State:', 
-            if os.path.exists(expconf.PROCDIR + '/' + userhost.split('@')[1] + '/' + id):
-                print bold(yellow('RUNNING'))
+            id = user = host = cwd = cmd = prompt = ""
+            f = open(headfile,'r')            
+            for line in f:
+                if line[0:4] == '*ID*':
+                    id = line[4:].strip()
+                elif line[0:6] == '*USER*':
+                    user = line[6:].strip()                    
+                elif line[0:6] == '*HOST*':
+                    host = line[6:].strip()                        
+                elif line[0:9] == '*COMMAND*':
+                    cmd = line[9:].strip()                        
+                elif line[0:5] == '*CWD*':
+                    cwd = line[5:].strip()                        
+                elif line[0:7] == '*START*':
+                    start = line[7:].strip()                                            
+            f.close()                        
+            if os.path.exists(expconf.PROCDIR + '/' + HOST + '/' + id):
+                prompt =  bold(yellow('RUNNING')) + ' ' + cwd + bold(yellow('$'))
             else:                
                 if os.path.exists(expconf.EXPLOGDIR + id + '.failed'):
-                    print  bold(red('FAILED'))
+                    prompt =  bold(red('FAILED')) + ' ' + cwd + bold(red('$'))
                 elif os.path.exists(expconf.EXPLOGDIR + id + '.log') and os.path.exists(expconf.EXPLOGDIR + id + '.err'):
-                    print bold(green('SUCCESS'))
+                    prompt = bold(green('SUCCESS')) + ' ' + cwd + bold(green('$'))
                 else:
-                    print bold(red('MISSING'))                    
-            os.system("cat " + headfile)
-            print "====================="
-            print "Output line count: ",
+                    prompt =  bold(red('MISSING')) + ' ' + cwd + bold(red('$'))                       
+            out = yellow(start) + ' ' + green(user+'@'+host) +' ' +bold(white(id)) + ' ' + prompt +' ' +blue(cmd)
+            print out
+            print bold(white("====================="))
             os.system("wc -l " + expconf.EXPLOGDIR + id + '.log')            
-            print "Error output line count: ",
             os.system("wc -l " + expconf.EXPLOGDIR + id + '.err')                        
+            print bold(white("====================="))
+            print bold(white("Log tail:"))
+            os.system("tail -n 10 " + expconf.EXPLOGDIR + id + '.log')            
+            print bold(white("====================="))
+            print bold(white("Error logtail:"))
+            os.system("tail -n 10 " + expconf.EXPLOGDIR + id + '.err')            
+            print bold(white("====================="))
         else:
             print >>sys.stderr, "No such experiment on the current host"
     elif command in ['repeat','restart']:
@@ -625,7 +646,7 @@ else:
                         userhost = magenta(userhost)
                         prompt = workdir + bold(magenta(prompt))    
                     
-                    out = yellow(date[0:4] + '-' + date[4:6] + '-' + date[6:8] + ' ' + weekday + ' ' + time) + ' ' + userhost +' ' +bold(white(id)) + ' ' + prompt +' ' +cmdline
+                    out = yellow(date[0:4] + '-' + date[4:6] + '-' + date[6:8] + ' ' + weekday + ' ' + time) + ' ' + userhost +' ' +bold(white(id)) + ' ' + prompt +' ' +blue(cmdline)
                     if cmdline == prevcmdline:
                         #duplicate, replace:
                         output[-1] = out
