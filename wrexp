@@ -342,7 +342,7 @@ def wait(id, process):
     lastrestime = begintime
     lastmailtime = begintime
     
-    #Now wait till process is done
+    done = False
     while True:
             process.poll()
             if process.returncode == 0:
@@ -350,8 +350,14 @@ def wait(id, process):
                 break
             elif process.returncode > 0:
                 errorcode = process.returncode
-                errors = True                
+                errors = True                                
                 break
+            elif process.returncode < 0:
+                #process was terminated by another
+                errorcode = process.returncode
+                errors = True
+                break            
+                
             time.sleep(expconf.POLLINTERVAL)
             now = datetime.datetime.now()
             duration = now - begintime
