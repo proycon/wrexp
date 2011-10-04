@@ -342,10 +342,11 @@ def wait(id, process):
     lastrestime = begintime
     lastmailtime = begintime
     
-    done = False
     while True:
             process.poll()
-            if process.returncode == 0:
+            if process.returncode is None:
+                pass
+            elif process.returncode == 0:
                 errors = False
                 break
             elif process.returncode > 0:
