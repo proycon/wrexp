@@ -717,8 +717,10 @@ else:
                             userhost = magenta(userhost)
                         prompt =  bold(yellow('RUNNING')) + ' ' + workdir + bold(yellow('$'))                                                    
                     elif userhost.split('@')[1] == HOST:
-                        userhost = green(userhost)                        
-                        if os.path.exists(expconf.EXPLOGDIR + id + '.failed'):
+                        userhost = green(userhost)             
+                        if os.path.exists(expconf.EXPLOGDIR + id + '.queued'):
+                            prompt =  bold(blue('QUEUED')) + ' ' + cwd + bold(blue('$'))
+                        elif os.path.exists(expconf.EXPLOGDIR + id + '.failed'):
                             prompt =  bold(red('FAILED')) + ' ' + workdir + bold(red('$'))                                             
                         elif os.path.exists(expconf.EXPLOGDIR + id + '.log') and os.path.exists(expconf.EXPLOGDIR + id + '.err'):
                             #catch very common errors from err output (backward compatibility with old exp tools):                            
