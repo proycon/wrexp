@@ -719,7 +719,7 @@ else:
                     elif userhost.split('@')[1] == HOST:
                         userhost = green(userhost)             
                         if os.path.exists(expconf.EXPLOGDIR + id + '.queued'):
-                            prompt =  bold(blue('QUEUED')) + ' ' + cwd + bold(blue('$'))
+                            prompt =  bold(blue('QUEUED')) + ' ' + workdir + bold(blue('$'))
                         elif os.path.exists(expconf.EXPLOGDIR + id + '.failed'):
                             prompt =  bold(red('FAILED')) + ' ' + workdir + bold(red('$'))                                             
                         elif os.path.exists(expconf.EXPLOGDIR + id + '.log') and os.path.exists(expconf.EXPLOGDIR + id + '.err'):
