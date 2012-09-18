@@ -491,11 +491,11 @@ else:
             args = sys.argv[5:]
 
         ret = os.system('which ' + cmd + ' >/dev/null 2> /dev/null')   
-        if not mem[:-1].isdigit() or mem[-1].upper() != 'G' or mem[-1].upper() != 'M': 
+        if not mem[:-1].isdigit() or (mem[-1].upper() != 'G' and mem[-1].upper() != 'M'): 
             print >>sys.stderr,"Expected memory specification, got invalid string: ", mem
         elif ret != 0:
             print >>sys.stderr,"Command not found: ", cmd            
-        else:            
+        else:
             queue(id,mem,[cmd]+args)            
         
     elif command in ['stop', 'kill']:
