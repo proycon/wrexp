@@ -271,7 +271,7 @@ def queue(id, memory, cmdline):
     f.write(now.strftime("%Y%m%d %a %H:%M:%S") + ' ' + ' ' + USER + '@' + HOST + ' ' + id + ' ' + os.getcwd() + '$ ' + " ".join(cmdline) + '\n')
     f.close()
     
-    process = subprocess.Popen('qsub -hard -m n -l hostname=' + HOST + ",mem_free=" + memory + " -o ./ -N " + id, shell=False,stdin=subprocess.PIPE,stdout=sys.stdout,stderr=sys.stderr)
+    process = subprocess.Popen('qsub -hard -m n -l hostname=' + HOST + ",mem_free=" + memory + " -o ./ -N " + id, shell=True,stdin=subprocess.PIPE,stdout=sys.stdout,stderr=sys.stderr)
     gridenginescript = "#!/bin/bash\n"
     gridenginescript += "cd " + os.getcwd() + "\n"
     gridenginescript += "wrexp start " + id + " " + os.getcwd() + " " + " ".join(cmdline) + "\n"
