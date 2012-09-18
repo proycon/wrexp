@@ -30,7 +30,6 @@ import subprocess
 import sys
 import os
 import glob
-import time
 import re
 
 import wrexpconf as expconf
@@ -46,6 +45,8 @@ if not os.path.isdir(expconf.EXPLOGDIR):
 def usage():
     print "Syntax: wrexp start    EXPERIMENT-ID [CWD] COMMAND"
     print "          - Start an experiment (optionally within a specific working directory)"
+    print "        wrexp qstart   EXPERIMENT-ID [CWD] [MEMORY] COMMAND"
+    print "          - Queue/start an experiment over grid engine (confined to the current host!)"
     print "        wrexp info     EXPERIMENT-ID"
     print "          - Show information on an experiment"
     print "        wrexp repeat   EXPERIMENT-ID"    
@@ -101,41 +102,34 @@ def usage():
 
 def bold(s):
    CSI="\x1B["
-   reset=CSI+"m"
    return CSI+"1m" + s + CSI + "0m"
    
 def white(s):
    CSI="\x1B["
-   reset=CSI+"m"
    return CSI+"37m" + s + CSI + "0m"   
 
 
 def red(s):
    CSI="\x1B["
-   reset=CSI+"m"
    return CSI+"31m" + s + CSI + "0m"
    
 def green(s):
    CSI="\x1B["
-   reset=CSI+"m"
    return CSI+"32m" + s + CSI + "0m"   
 
 
 def yellow(s):
    CSI="\x1B["
-   reset=CSI+"m"
    return CSI+"33m" + s + CSI + "0m"   
 
    
 def blue(s):
    CSI="\x1B["
-   reset=CSI+"m"
    return CSI+"34m" + s + CSI + "0m"   
    
 
 def magenta(s):
    CSI="\x1B["
-   reset=CSI+"m"
    return CSI+"35m" + s + CSI + "0m"   
 
 
@@ -144,7 +138,6 @@ def magenta(s):
 def boldoptions(s):
     def bleubold(s):
         CSI="\x1B["
-        reset=CSI+"m"
         return CSI+"1m" + s + CSI + "0m" + CSI + "34m"
     
     r = re.compile(r'\s--?[A-Za-z0-9]+=?')
@@ -238,8 +231,7 @@ def ps(host, dir = ""):
     if out: print out
     return found
 
-def start(id, cmdline):
-    global USER, HOST
+def prestart(id):
     try:
         os.makedirs(expconf.PROCDIR + '/' + HOST)
     except:
@@ -261,6 +253,35 @@ def start(id, cmdline):
         
     if os.path.exists(expconf.EXPLOGDIR + '/' + id + '.failed'):
         os.unlink(expconf.EXPLOGDIR + '/' + id + '.failed')
+
+    return dir, base_id, HISTORYFILE
+
+def queue(id, memory, cmdline):
+    dir, base_id, HISTORYFILE = prestart(id)
+    
+    #write process file
+    f = open(expconf.PROCDIR + '/' + HOST + '/' + dir + '/' + base_id ,'w')
+    f.write("Q\n")
+    f.write(" ".join(cmdline)+"\n")
+    f.close()
+    
+    #write history file
+    now = datetime.datetime.now()
+    f = open(HISTORYFILE,'a')
+    f.write(now.strftime("%Y%m%d %a %H:%M:%S") + ' ' + ' ' + USER + '@' + HOST + ' ' + id + ' ' + os.getcwd() + '$ ' + " ".join(cmdline) + '\n')
+    f.close()
+    
+    process = subprocess.Popen('qsub -hard -m n -l hostname=' + HOST + ",mem_free=" + memory + " -o ./ -N " + id, shell=False,stdin=subprocess.PIPE,stdout=sys.stdout,stderr=sys.stderr)
+    gridenginescript = "#!/bin/bash\n"
+    gridenginescript += "cd " + os.getcwd() + "\n"
+    gridenginescript += "wrexp start " + id + " " + os.getcwd() + " " + " ".join(cmdline) + "\n"
+   
+    process.communicate(input=gridenginescript)
+
+
+def start(id, cmdline):
+    global USER, HOST
+    dir, base_id, HISTORYFILE = prestart(id)    
         
 
     versionlog = expconf.EXPLOGDIR + '/' + dir + '/'+ base_id + '.versions'
@@ -453,6 +474,30 @@ else:
            pid = start(id, args)
            if pid:
               wait(id, pid)
+    elif command == 'qstart':              
+        id = sys.argv[2] if len(sys.argv) >= 5 else usage()
+        if id[0:2] == "./": usage()
+        
+        if os.path.isdir(sys.argv[3]):
+            cwd = sys.argv[3]
+            mem = sys.argv[4]
+            cmd = sys.argv[5]
+            args = sys.argv[6:]
+            os.chdir(cwd)
+        else:
+            cwd = None
+            mem = sys.argv[3]
+            cmd = sys.argv[4]
+            args = sys.argv[5:]
+
+        ret = os.system('which ' + cmd + ' >/dev/null 2> /dev/null')   
+        if not mem[:-1].isdigit() or mem[-1] != 'G' or mem[-1] != 'M': 
+            print >>sys.stderr,"Expected memory specification, got invalid string: ", mem
+        elif ret != 0:
+            print >>sys.stderr,"Command not found: ", cmd            
+        else:            
+            queue(id,mem,[cmd]+args)            
+        
     elif command in ['stop', 'kill']:
         id = sys.argv[2] if len(sys.argv) >= 3 else usage()
         #find the process
