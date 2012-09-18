@@ -259,20 +259,22 @@ def prestart(id):
 def queue(id, memory, cmdline):
     dir, base_id, HISTORYFILE = prestart(id)
     
+    
+    now = datetime.datetime.now()
+    
     #write process file
-    f = open(expconf.PROCDIR + '/' + HOST + '/' + dir + '/' + base_id ,'w')
-    f.write("Q\n")
-    f.write(" ".join(cmdline)+"\n")
+    f = open(expconf.EXPLOGDIR + id + ".queued" ,'w')
+    f.write(now.strftime("%Y%m%d %a %H:%M:%S"))
     f.close()
     
-    #write history file
-    now = datetime.datetime.now()
+    #write history file    
     f = open(HISTORYFILE,'a')
     f.write(now.strftime("%Y%m%d %a %H:%M:%S") + ' ' + ' ' + USER + '@' + HOST + ' ' + id + ' ' + os.getcwd() + '$ ' + " ".join(cmdline) + '\n')
     f.close()
     
     process = subprocess.Popen('qsub -hard -m n -l hostname=' + HOST + ",mem_free=" + memory + " -o ./ -N " + id, shell=True,stdin=subprocess.PIPE,stdout=sys.stdout,stderr=sys.stderr)
     gridenginescript = "#!/bin/bash\n"
+    gridenginescript += "rm -f '" + expconf.EXPLOGDIR + id + ".queued'\n"
     gridenginescript += "cd " + os.getcwd() + "\n"
     gridenginescript += "wrexp start " + id + " " + os.getcwd() + " " + " ".join(cmdline) + "\n"
    
@@ -548,7 +550,9 @@ else:
             if os.path.exists(expconf.PROCDIR + '/' + HOST + '/' + id):
                 prompt =  bold(yellow('RUNNING')) + ' ' + cwd + bold(yellow('$'))
             else:                
-                if os.path.exists(expconf.EXPLOGDIR + id + '.failed'):
+                if os.path.exists(expconf.EXPLOGDIR + id + '.queued'):
+                    prompt =  bold(blue('QUEUED')) + ' ' + cwd + bold(blue('$'))
+                elif os.path.exists(expconf.EXPLOGDIR + id + '.failed'):
                     prompt =  bold(red('FAILED')) + ' ' + cwd + bold(red('$'))
                 elif os.path.exists(expconf.EXPLOGDIR + id + '.log') and os.path.exists(expconf.EXPLOGDIR + id + '.err'):
                     prompt = bold(green('SUCCESS')) + ' ' + cwd + bold(green('$'))
