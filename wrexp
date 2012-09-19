@@ -275,7 +275,7 @@ def queue(id, memory, cmdline):
     
     process = subprocess.Popen('qsub -hard -m n -l hostname=' + HOST + ",mem_free=" + memory + " -o ./ -N " + id, shell=True,stdin=subprocess.PIPE,stdout=sys.stdout,stderr=sys.stderr)
     gridenginescript = "#!/bin/bash\n"
-    gridenginescript += "rm -f '" + expconf.EXPLOGDIR + id + ".queued'\n"
+    gridenginescript += "rm -f \"" + expconf.EXPLOGDIR + id + ".queued\"\n"
     gridenginescript += "cd " + os.getcwd() + "\n"
     gridenginescript += "wrexp start " + id + " " + os.getcwd() + " " + " ".join(cmdline) + "\n"
    
