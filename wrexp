@@ -280,6 +280,8 @@ def queue(id, memory, cmdline):
     gridenginescript += "wrexp start " + id + " " + os.getcwd() + " " + " ".join(cmdline) + "\n"
    
     process.communicate(input=gridenginescript)
+    
+    print gridenginescript
 
 
 def start(id, cmdline):
