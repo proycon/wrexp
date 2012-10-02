@@ -494,7 +494,7 @@ else:
         
         cmd = None
         args = []
-        for i, arg in enumerate(sys.argv[3:]):
+        for i, arg in enumerate(sys.argv[3:]):           
             if os.path.isdir(arg):
                 cwd = arg
                 os.chdir(cwd)
@@ -504,8 +504,9 @@ else:
                 q = arg[2:]
             else:
                 cmd = arg
-                args = sys.argv[3+i:]
+                args = sys.argv[4+i:]
                 break
+    
             
         if not cmd:
             print >>sys.stderr,"No command specified!"
