@@ -493,6 +493,7 @@ else:
         cwd = None
         
         cmd = None
+        q = None
         args = []
         for i, arg in enumerate(sys.argv[3:]):           
             if os.path.isdir(arg):
@@ -518,7 +519,7 @@ else:
         elif ret != 0:
             print >>sys.stderr,"Command not found: ", cmd            
         else:
-            qsub(id,mem,[cmd]+args)            
+            qsub(id,mem,[cmd]+args,q)            
         
     elif command in ['stop', 'kill']:
         id = sys.argv[2] if len(sys.argv) >= 3 else usage()
