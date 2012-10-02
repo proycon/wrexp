@@ -505,6 +505,7 @@ else:
             else:
                 cmd = arg
                 args = sys.argv[3+i:]
+                break
             
         if not cmd:
             print >>sys.stderr,"No command specified!"
