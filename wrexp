@@ -503,8 +503,8 @@ else:
             elif arg[:2] == 'q=':
                 q = arg[2:]
             else:
-                cmd = sys.argv[3+i]
-                args = sys.argv[4+i:]
+                cmd = arg
+                args = sys.argv[3+i:]
             
         if not cmd:
             print >>sys.stderr,"No command specified!"
