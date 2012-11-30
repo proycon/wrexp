@@ -257,7 +257,7 @@ def prestart(id):
 
     return dir, base_id, HISTORYFILE
 
-def qsub(id, memory, cmdline, q = None):
+def qsub(id, memory, cmdline, q = None, cores = 1):
     dir, base_id, HISTORYFILE = prestart(id)
     
     
@@ -278,7 +278,11 @@ def qsub(id, memory, cmdline, q = None):
     else:
         q = " -q " + q    
     
-    process = subprocess.Popen('qsub -hard -m n ' + q + ' -l hostname=' + HOST + ",mem_free=" + memory + " -o ./ -N " + id, shell=True,stdin=subprocess.PIPE,stdout=sys.stdout,stderr=sys.stderr)
+    if cores > 1:
+        cores = ' -pe multicore ' + str(cores)
+    else:
+        cores = ''
+    process = subprocess.Popen('qsub -hard -m n ' + q + ' -l hostname=' + HOST + ",mem_free=" + memory + " " + cores + " -o ./ -N " + id, shell=True,stdin=subprocess.PIPE,stdout=sys.stdout,stderr=sys.stderr)
     gridenginescript = "#!/bin/bash\n"
     gridenginescript += "rm -f \"" + expconf.EXPLOGDIR + id + ".queued\"\n"
     gridenginescript += "cd " + os.getcwd() + "\n"
@@ -494,6 +498,7 @@ else:
         
         cmd = None
         q = None
+        cores = 1
         args = []
         for i, arg in enumerate(sys.argv[3:]):           
             if os.path.isdir(arg):
@@ -503,6 +508,8 @@ else:
                 mem = arg[4:] 
             elif arg[:2] == 'q=':
                 q = arg[2:]
+            elif arg[:2] == 'c=':
+                cores = int(arg[2:])
             else:
                 cmd = arg
                 args = sys.argv[4+i:]
@@ -519,7 +526,7 @@ else:
         elif ret != 0:
             print >>sys.stderr,"Command not found: ", cmd            
         else:
-            qsub(id,mem,[cmd]+args,q)            
+            qsub(id,mem,[cmd]+args,q,cores)            
         
     elif command in ['stop', 'kill']:
         id = sys.argv[2] if len(sys.argv) >= 3 else usage()
